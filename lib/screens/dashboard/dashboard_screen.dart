@@ -8,6 +8,7 @@ import '../../widgets/app_navbar.dart';
 import '../../widgets/app_footer.dart';
 import 'sections/book_row_section.dart';
 import '../book/book_detail_screen.dart';
+import '../account/account_settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final AppUser user;
@@ -71,13 +72,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // TODO: Navigate to AI assistant screen
   }
 
-  void _handleAccount() {
+ void _handleAccount() {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => _AccountSheet(user: widget.user, onLogout: _handleLogout),
+      builder: (_) => _AccountSheet(
+        user: widget.user,
+        onSettings: () {
+          Navigator.pop(context); // close sheet first
+          _goToSettings();
+        },
+        onLogout: _handleLogout,
+      ),
+    );
+  }
+
+  void _goToSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AccountSettingsScreen(
+          user: widget.user,
+          onUserUpdated: (updatedUser) {
+            // Bubble updated user back up if needed
+            // For now just update local state via setState
+            setState(() {});
+          },
+          onCharts: _handleCharts,
+          onAI: _handleAI,
+          onAccount: _handleAccount,
+          onAddBook: () {
+            // TODO: Navigate to Add Book screen
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Add Book screen coming soon')),
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -143,9 +176,14 @@ class _Divider extends StatelessWidget {
 
 class _AccountSheet extends StatelessWidget {
   final AppUser user;
+  final VoidCallback onSettings;
   final VoidCallback onLogout;
 
-  const _AccountSheet({required this.user, required this.onLogout});
+  const _AccountSheet({
+    required this.user,
+    required this.onSettings,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -154,25 +192,82 @@ class _AccountSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Handle bar
+          Container(
+            width: 36,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDDDDDD),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Avatar
           const CircleAvatar(
             radius: 32,
             backgroundColor: AppTheme.black,
             child: Icon(Icons.person, color: AppTheme.white, size: 32),
           ),
           const SizedBox(height: 12),
+
+          // Username
           Text(
             user.username,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
+
+          // Email
           Text(user.email, style: const TextStyle(color: AppTheme.textGrey)),
+
+          // Author badge
+          if (user.isAuthor) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF9C4),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFF9A825)),
+              ),
+              child: const Text(
+                'Author',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFF57F17),
+                ),
+              ),
+            ),
+          ],
+
           const SizedBox(height: 24),
+
+          // Account Settings button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                onLogout();
-              },
+              onPressed: onSettings,
+              icon: const Icon(Icons.settings, size: 16),
+              label: const Text('Account Settings'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.black,
+                side: const BorderSide(color: Color(0xFFCCCCCC)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Log Out button
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onLogout,
               icon: const Icon(Icons.logout, size: 16),
               label: const Text('Log Out'),
               style: OutlinedButton.styleFrom(
@@ -181,6 +276,7 @@ class _AccountSheet extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
           ),
