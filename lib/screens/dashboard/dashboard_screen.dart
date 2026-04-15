@@ -44,46 +44,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final _authService = AuthService();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
   void _handleBookTap(Book book) {
-    final idMap = {
-      'To Kill a Mockingbird': 'tkam',
-      '1984': '1984',
-      'Pride and Prejudice': 'pap',
-      'The Great Gatsby': 'tgg',
-      'Moby Dick': 'md',
-      'The Catcher in the Rye': 'citr',
-      'Brave New World': 'bnw',
-      'The Hobbit': 'hobbit',
-      "Harry Potter and the Sorcerer's Stone": 'hp1',
-      'The Lord of the Rings': 'lotr',
-      'Animal Farm': 'af',
-    };
-    final bookId = idMap[book.title];
-    if (bookId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No detail page for: ${book.title}')),
-      );
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BookDetailScreen(
-          bookId: bookId,
-          currentUser: widget.user,
-          onBack: () => Navigator.pop(context),
-          onCharts: _handleCharts,
-          onAI: _handleAI,
-          onAccount: _handleAccount,
-        ),
-      ),
-    );
+    widget.onBookTap?.call(book);
   }
 
   void _handleLogout() {
@@ -92,28 +64,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _handleCharts() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChartsScreen(
-          currentUser: widget.user,
-          onBookTap: (id) => _handleBookTapById(id),
-          onCharts: _handleCharts,
-          onAI: _handleAI,
-          onAccount: _handleAccount,
-        ),
-      ),
-    );
+    widget.onCharts?.call();
   }
 
   void _handleAI() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('AI Assistant coming soon')));
+    widget.onAI?.call();
   }
 
   void _handleAccount() {
-    // Show bottom sheet FIRST — this was broken
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -123,82 +81,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       builder: (_) => _AccountSheet(
         user: widget.user,
-        onSettings: _goToAccountSettings,
-        onLogout: _handleLogout,
-      ),
-    );
-  }
-
-  void _goToAccountSettings() {
-    Navigator.pop(context); // Close bottom sheet first
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AccountSettingsScreen(
-          user: widget.user,
-          onUserUpdated: (_) => setState(() {}),
-          onCharts: _handleCharts,
-          onAI: _handleAI,
-          onAccount: _handleAccount,
-          onAddBook: _goToAddBook,
-        ),
-      ),
-    );
-  }
-
-  void _goToAddBook() {
-    Navigator.pop(context); // Close bottom sheet first
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AddBookScreen(
-          currentUser: widget.user,
-          onCancel: () => Navigator.pop(context),
-          onBookAdded: () {
-            Navigator.pop(context);
-            setState(() {});
-          },
-          onCharts: _handleCharts,
-          onAI: _handleAI,
-          onAccount: _handleAccount,
-        ),
+        onSettings: () {
+          Navigator.pop(context);
+          widget.onAccount?.call();
+        },
+        onLogout: () {
+          Navigator.pop(context);
+          _handleLogout();
+        },
       ),
     );
   }
 
   void _handleSearch(String query) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SearchScreen(
-          currentUser: widget.user,
-          initialQuery: query,
-          onBookTap: (book) {
-            Navigator.pop(context);
-            _handleBookTapById(book.id);
-          },
-          onCharts: _handleCharts,
-          onAI: _handleAI,
-          onAccount: _handleAccount,
-        ),
-      ),
-    );
-  }
-
-  void _handleBookTapById(String bookId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BookDetailScreen(
-          bookId: bookId,
-          currentUser: widget.user,
-          onBack: () => Navigator.pop(context),
-          onCharts: _handleCharts,
-          onAI: _handleAI,
-          onAccount: _handleAccount,
-        ),
-      ),
-    );
+    widget.onSearch?.call(query);
   }
 
   @override

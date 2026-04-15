@@ -176,7 +176,7 @@ class _SearchNavbar extends StatelessWidget {
       child: Row(
         children: [
           GestureDetector(
-            onTap: onBrandTap, // ADD THIS
+            onTap: onBrandTap,
             child: const Text('Catalogs', style: AppTheme.navBrand),
           ),
           // const Text('Catalogs', style: AppTheme.navBrand),

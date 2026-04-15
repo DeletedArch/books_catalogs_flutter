@@ -47,6 +47,7 @@ class AppNavbar extends StatelessWidget {
           GestureDetector(
             onTap: onBrandTap,
             child: const Text('Catalogs', style: AppTheme.navBrand),
+            // child: const Text('Catalogs', style: AppTheme.navBrand),
           ),
           const SizedBox(width: 12),
           Expanded(

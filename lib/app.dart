@@ -10,6 +10,7 @@ import 'screens/charts/charts_screen.dart';
 import 'screens/add_book/add_book_screen.dart';
 import 'screens/book/book_detail_screen.dart';
 import 'screens/account/account_settings_screen.dart';
+import 'screens/ai/ai_screen.dart';
 import 'services/auth_service.dart';
 
 class CatalogsApp extends StatelessWidget {
@@ -50,8 +51,6 @@ class _RootNavigatorState extends State<_RootNavigator> {
   }
 
   void _goDashboard() {
-    print(_user?.username);
-    print("Going to dashboard");
     setState(() => _current = _Screen.dashboard);
   }
 
@@ -73,10 +72,18 @@ class _RootNavigatorState extends State<_RootNavigator> {
 
   void _goCharts() => _goTo(_Screen.charts);
   void _goAI() {
-    // TODO: AI screen
-    ScaffoldMessenger.of(
+    Navigator.push(
       context,
-    ).showSnackBar(const SnackBar(content: Text('AI coming soon')));
+      MaterialPageRoute(
+        builder: (_) => AIScreen(
+          currentUser: _user!,
+          onCharts: _goCharts,
+          onAI: _goAI,
+          onAccount: _goAccount,
+          onBrandTap: _goDashboard,
+        ),
+      ),
+    );
   }
 
   void _goAccount() {
@@ -131,7 +138,23 @@ class _RootNavigatorState extends State<_RootNavigator> {
         return DashboardScreen(
           user: _user!,
           onLogout: _onLogout,
-          onBookTap: (book) => _goBookDetail(book.title),
+          onBookTap: (book) {
+            final idMap = {
+              'To Kill a Mockingbird': 'tkam',
+              '1984': '1984',
+              'Pride and Prejudice': 'pap',
+              'The Great Gatsby': 'tgg',
+              'Moby Dick': 'md',
+              'The Catcher in the Rye': 'citr',
+              'Brave New World': 'bnw',
+              'The Hobbit': 'hobbit',
+              "Harry Potter and the Sorcerer's Stone": 'hp1',
+              'The Lord of the Rings': 'lotr',
+              'Animal Farm': 'af',
+            };
+            final bookId = idMap[book.title] ?? book.title;
+            _goBookDetail(bookId);
+          },
           onCharts: _goCharts,
           onAI: _goAI,
           onAccount: _goAccount,
