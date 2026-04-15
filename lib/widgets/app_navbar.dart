@@ -15,8 +15,11 @@ class AppNavbar extends StatelessWidget {
   final VoidCallback? onAI;
   final VoidCallback? onAccount;
 
-  // Search submission — fires when user hits enter or search button
+  // Search submission
   final void Function(String query)? onSearch;
+
+  // Brand/logo tap — goes to home or dashboard based on login
+  final VoidCallback? onBrandTap;
 
   const AppNavbar({
     super.key,
@@ -27,7 +30,8 @@ class AppNavbar extends StatelessWidget {
     this.onCharts,
     this.onAI,
     this.onAccount,
-    this.onSearch, // ADD
+    this.onSearch,
+    this.onBrandTap,
   });
 
   bool get _isLoggedIn => currentUser != null;
@@ -39,13 +43,14 @@ class AppNavbar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          const Text('Catalogs', style: AppTheme.navBrand),
+          // Brand — tap to go home/dashboard
+          GestureDetector(
+            onTap: onBrandTap,
+            child: const Text('Catalogs', style: AppTheme.navBrand),
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: _SearchBar(
-              controller: searchController,
-              onSearch: onSearch, // pass down
-            ),
+            child: _SearchBar(controller: searchController, onSearch: onSearch),
           ),
           const SizedBox(width: 8),
           if (_isLoggedIn) ...[
@@ -87,21 +92,17 @@ class _SearchBar extends StatelessWidget {
         controller: controller,
         style: const TextStyle(color: AppTheme.white, fontSize: 13),
         textInputAction: TextInputAction.search,
-        onSubmitted: onSearch, // fires on keyboard search key
+        onSubmitted: onSearch,
         decoration: InputDecoration(
           hintText: 'Search for books...',
           hintStyle: const TextStyle(color: Color(0xFF666666), fontSize: 13),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Color(0xFF666666),
-            size: 18,
-          ),
+          // REMOVED prefixIcon — only keep suffix search button
           suffixIcon: IconButton(
             icon: const Icon(Icons.search, color: Color(0xFF888888), size: 16),
             onPressed: () => onSearch?.call(controller.text),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         ),
       ),
     );

@@ -43,40 +43,45 @@ class _RootNavigatorState extends State<_RootNavigator> {
   // Book detail state
   String? _pendingBookId;
 
+  void _goHome() {
+    print('Going home');
+    print(_user?.username);
+    setState(() => _current = _Screen.home);
+  }
+
+  void _goDashboard() {
+    print(_user?.username);
+    print("Going to dashboard");
+    setState(() => _current = _Screen.dashboard);
+  }
+
   void _goTo(_Screen screen) => setState(() => _current = screen);
 
-  void _onLoginSuccess(AppUser user) =>
-      setState(() {
-        _user = user;
-        _current = _Screen.dashboard;
-      });
+  void _onLoginSuccess(AppUser user) => setState(() {
+    _user = user;
+    _current = _Screen.dashboard;
+  });
 
-  void _onLogout() =>
-      setState(() {
-        _user = null;
-        _current = _Screen.home;
-      });
+  void _onLogout() => setState(() {
+    _user = null;
+    _current = _Screen.home;
+  });
 
-  void _onUserUpdated(AppUser user) =>
-      setState(() => _user = user);
+  void _onUserUpdated(AppUser user) => setState(() => _user = user);
 
   // ── Shared nav callbacks ───────────────────────────────────────────────
 
   void _goCharts() => _goTo(_Screen.charts);
   void _goAI() {
     // TODO: AI screen
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('AI coming soon')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('AI coming soon')));
   }
 
   void _goAccount() {
     if (_user == null) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => _buildAccountSettings(),
-      ),
-    );
+    setState(() => _current = _Screen.account);
   }
 
   void _goSearch(String query) {
@@ -98,17 +103,6 @@ class _RootNavigatorState extends State<_RootNavigator> {
 
   // ── Screen builders ───────────────────────────────────────────────────
 
-  Widget _buildAccountSettings() {
-    return _AccountSettingsWrapper(
-      user: _user!,
-      onUserUpdated: _onUserUpdated,
-      onLogout: _onLogout,
-      onCharts: _goCharts,
-      onAI: _goAI,
-      onAddBook: _goAddBook,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     switch (_current) {
@@ -116,20 +110,21 @@ class _RootNavigatorState extends State<_RootNavigator> {
         return HomeScreen(
           onLogin: () => _goTo(_Screen.login),
           onSignUp: () => _goTo(_Screen.signUp),
+          onBrandTap: _goHome, // ADD THIS
         );
 
       case _Screen.login:
         return LoginScreen(
           onSignUpTap: () => _goTo(_Screen.signUp),
-          onLoginSuccess: () =>
-              _onLoginSuccess(AuthService().currentUser!),
+          onLoginSuccess: () => _onLoginSuccess(AuthService().currentUser!),
+          onBrandTap: _goHome, // ADD THIS
         );
 
       case _Screen.signUp:
         return SignUpScreen(
           onLoginTap: () => _goTo(_Screen.login),
-          onSignUpSuccess: () =>
-              _onLoginSuccess(AuthService().currentUser!),
+          onSignUpSuccess: () => _onLoginSuccess(AuthService().currentUser!),
+          onBrandTap: _goHome, // ADD THIS
         );
 
       case _Screen.dashboard:
@@ -141,6 +136,7 @@ class _RootNavigatorState extends State<_RootNavigator> {
           onAI: _goAI,
           onAccount: _goAccount,
           onSearch: _goSearch,
+          onBrandTap: _goDashboard, // ADD THIS
         );
 
       case _Screen.search:
@@ -151,6 +147,7 @@ class _RootNavigatorState extends State<_RootNavigator> {
           onCharts: _goCharts,
           onAI: _goAI,
           onAccount: _goAccount,
+          onBrandTap: _user != null ? _goDashboard : _goHome, // ADD THIS
         );
 
       case _Screen.charts:
@@ -160,6 +157,7 @@ class _RootNavigatorState extends State<_RootNavigator> {
           onCharts: _goCharts,
           onAI: _goAI,
           onAccount: _goAccount,
+          onBrandTap: _user != null ? _goDashboard : _goHome, // ADD THIS
         );
 
       case _Screen.addBook:
@@ -170,6 +168,7 @@ class _RootNavigatorState extends State<_RootNavigator> {
           onCharts: _goCharts,
           onAI: _goAI,
           onAccount: _goAccount,
+          onBrandTap: _goDashboard, // ADD THIS (author only)
         );
 
       case _Screen.bookDetail:
@@ -180,6 +179,17 @@ class _RootNavigatorState extends State<_RootNavigator> {
           onCharts: _goCharts,
           onAI: _goAI,
           onAccount: _goAccount,
+          onBrandTap: _user != null ? _goDashboard : _goHome, // ADD THIS
+        );
+      case _Screen.account:
+        return AccountSettingsScreen(
+          user: _user!,
+          onUserUpdated: _onUserUpdated,
+          onCharts: _goCharts,
+          onAI: _goAI,
+          onAccount: _goDashboard,
+          onAddBook: _goAddBook,
+          onBrandTap: _goDashboard,
         );
     }
   }
@@ -194,35 +204,5 @@ enum _Screen {
   charts,
   addBook,
   bookDetail,
-}
-
-// Thin wrapper to avoid importing account screen directly in app.dart
-class _AccountSettingsWrapper extends StatelessWidget {
-  final AppUser user;
-  final void Function(AppUser) onUserUpdated;
-  final VoidCallback onLogout;
-  final VoidCallback? onCharts;
-  final VoidCallback? onAI;
-  final VoidCallback? onAddBook;
-
-  const _AccountSettingsWrapper({
-    required this.user,
-    required this.onUserUpdated,
-    required this.onLogout,
-    this.onCharts,
-    this.onAI,
-    this.onAddBook,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AccountSettingsScreen(
-      user: user,
-      onUserUpdated: onUserUpdated,
-      onCharts: onCharts,
-      onAI: onAI,
-      onAccount: () => Navigator.pop(context),
-      onAddBook: onAddBook,
-    );
-  }
+  account,
 }

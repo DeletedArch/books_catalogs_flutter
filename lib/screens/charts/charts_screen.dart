@@ -14,6 +14,7 @@ class ChartsScreen extends StatefulWidget {
   final VoidCallback? onCharts;
   final VoidCallback? onAI;
   final VoidCallback? onAccount;
+  final VoidCallback? onBrandTap; // ADD THIS
 
   const ChartsScreen({
     super.key,
@@ -22,6 +23,7 @@ class ChartsScreen extends StatefulWidget {
     this.onCharts,
     this.onAI,
     this.onAccount,
+    this.onBrandTap, // ADD THIS
   });
 
   @override
@@ -84,6 +86,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
             onCharts: widget.onCharts,
             onAI: widget.onAI,
             onAccount: widget.onAccount,
+            onBrandTap: widget.onBrandTap, // ADD THIS
           ),
           Expanded(
             child: _isLoading

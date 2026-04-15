@@ -16,6 +16,7 @@ class AddBookScreen extends StatefulWidget {
   final VoidCallback? onCharts;
   final VoidCallback? onAI;
   final VoidCallback? onAccount;
+  final VoidCallback? onBrandTap; // ADD THIS
 
   const AddBookScreen({
     super.key,
@@ -25,6 +26,7 @@ class AddBookScreen extends StatefulWidget {
     this.onCharts,
     this.onAI,
     this.onAccount,
+    this.onBrandTap, // ADD THIS
   });
 
   @override
@@ -116,6 +118,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
             onCharts: widget.onCharts,
             onAI: widget.onAI,
             onAccount: widget.onAccount,
+            onBrandTap: widget.onBrandTap, // ADD THIS
           ),
           Expanded(
             child: SingleChildScrollView(

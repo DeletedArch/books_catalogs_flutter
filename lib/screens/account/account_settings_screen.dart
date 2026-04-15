@@ -14,6 +14,7 @@ class AccountSettingsScreen extends StatefulWidget {
   final VoidCallback? onAI;
   final VoidCallback? onAccount;
   final VoidCallback? onAddBook;
+  final VoidCallback? onBrandTap; // ADD THIS
 
   const AccountSettingsScreen({
     super.key,
@@ -23,6 +24,7 @@ class AccountSettingsScreen extends StatefulWidget {
     this.onAI,
     this.onAccount,
     this.onAddBook,
+    this.onBrandTap, // ADD THIS
   });
 
   @override
@@ -62,6 +64,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             onCharts: widget.onCharts,
             onAI: widget.onAI,
             onAccount: widget.onAccount,
+            onBrandTap: widget.onBrandTap, // ADD THIS
           ),
           Expanded(
             child: SingleChildScrollView(

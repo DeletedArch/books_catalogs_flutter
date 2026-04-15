@@ -14,6 +14,7 @@ class SearchScreen extends StatefulWidget {
   final VoidCallback? onCharts;
   final VoidCallback? onAI;
   final VoidCallback? onAccount;
+  final VoidCallback? onBrandTap; // ADD THIS
 
   const SearchScreen({
     super.key,
@@ -23,6 +24,7 @@ class SearchScreen extends StatefulWidget {
     this.onCharts,
     this.onAI,
     this.onAccount,
+    this.onBrandTap, // ADD THIS
   });
 
   @override
@@ -93,6 +95,7 @@ class _SearchScreenState extends State<SearchScreen> {
             onCharts: widget.onCharts,
             onAI: widget.onAI,
             onAccount: widget.onAccount,
+            onBrandTap: widget.onBrandTap, // ADD THIS
           ),
           Expanded(child: _buildBody()),
           const AppFooter(),
@@ -153,6 +156,7 @@ class _SearchNavbar extends StatelessWidget {
   final VoidCallback? onCharts;
   final VoidCallback? onAI;
   final VoidCallback? onAccount;
+  final VoidCallback? onBrandTap; // ADD THIS
 
   const _SearchNavbar({
     required this.controller,
@@ -161,6 +165,7 @@ class _SearchNavbar extends StatelessWidget {
     this.onCharts,
     this.onAI,
     this.onAccount,
+    this.onBrandTap, // ADD THIS
   });
 
   @override
@@ -170,7 +175,11 @@ class _SearchNavbar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          const Text('Catalogs', style: AppTheme.navBrand),
+          GestureDetector(
+            onTap: onBrandTap, // ADD THIS
+            child: const Text('Catalogs', style: AppTheme.navBrand),
+          ),
+          // const Text('Catalogs', style: AppTheme.navBrand),
           const SizedBox(width: 12),
           Expanded(
             child: Container(
@@ -191,11 +200,6 @@ class _SearchNavbar extends StatelessWidget {
                     color: Color(0xFF666666),
                     fontSize: 13,
                   ),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: Color(0xFF666666),
-                    size: 18,
-                  ),
                   suffixIcon: IconButton(
                     icon: const Icon(
                       Icons.search,
@@ -205,7 +209,7 @@ class _SearchNavbar extends StatelessWidget {
                     onPressed: () => onSearch(controller.text),
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 ),
               ),
             ),

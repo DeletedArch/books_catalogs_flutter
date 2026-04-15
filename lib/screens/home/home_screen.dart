@@ -11,11 +11,13 @@ class HomeScreen extends StatefulWidget {
   // ADD THESE
   final VoidCallback? onLogin;
   final VoidCallback? onSignUp;
-
+  final VoidCallback? onBrandTap; // ADD THIS
+  
   const HomeScreen({
     super.key,
     this.onLogin, // ADD THIS
     this.onSignUp, // ADD THIS
+    this.onBrandTap,
   });
 
   @override
@@ -50,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
             searchController: _searchController,
             onLogin: widget.onLogin, // WIRE UP
             onSignUp: widget.onSignUp, // WIRE UP
+            onBrandTap: widget.onBrandTap, // ADD THIS
           ),
           Expanded(
             child: SingleChildScrollView(

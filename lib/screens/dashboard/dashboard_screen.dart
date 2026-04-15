@@ -6,18 +6,22 @@ import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_navbar.dart';
 import '../../widgets/app_footer.dart';
-import 'sections/book_row_section.dart';
+import '../../widgets/book_card.dart';
 import '../book/book_detail_screen.dart';
+import '../search/search_screen.dart';
+import '../charts/charts_screen.dart';
 import '../account/account_settings_screen.dart';
+import '../add_book/add_book_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-    final AppUser user;
+  final AppUser user;
   final VoidCallback? onLogout;
-  final void Function(Book book)? onBookTap; // already exists
-  final VoidCallback? onCharts; // ADD
-  final VoidCallback? onAI; // ADD
-  final VoidCallback? onAccount; // ADD
-  final void Function(String query)? onSearch; // ADD
+  final void Function(Book book)? onBookTap;
+  final VoidCallback? onCharts;
+  final VoidCallback? onAI;
+  final VoidCallback? onAccount;
+  final void Function(String query)? onSearch;
+  final VoidCallback? onBrandTap; // ADD THIS
 
   const DashboardScreen({
     super.key,
@@ -28,6 +32,7 @@ class DashboardScreen extends StatefulWidget {
     this.onAI,
     this.onAccount,
     this.onSearch,
+    this.onBrandTap, // ADD THIS
   });
 
   @override
@@ -44,11 +49,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.dispose();
   }
 
-  // Add bookId map to MockData or use title as temp key
   void _handleBookTap(Book book) {
     final idMap = {
       'To Kill a Mockingbird': 'tkam',
+      '1984': '1984',
+      'Pride and Prejudice': 'pap',
+      'The Great Gatsby': 'tgg',
+      'Moby Dick': 'md',
+      'The Catcher in the Rye': 'citr',
+      'Brave New World': 'bnw',
+      'The Hobbit': 'hobbit',
+      "Harry Potter and the Sorcerer's Stone": 'hp1',
       'The Lord of the Rings': 'lotr',
+      'Animal Farm': 'af',
     };
     final bookId = idMap[book.title];
     if (bookId == null) {
@@ -79,50 +92,110 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _handleCharts() {
-    // TODO: Navigate to charts screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChartsScreen(
+          currentUser: widget.user,
+          onBookTap: (id) => _handleBookTapById(id),
+          onCharts: _handleCharts,
+          onAI: _handleAI,
+          onAccount: _handleAccount,
+        ),
+      ),
+    );
   }
 
   void _handleAI() {
-    // TODO: Navigate to AI assistant screen
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('AI Assistant coming soon')));
   }
 
- void _handleAccount() {
+  void _handleAccount() {
+    // Show bottom sheet FIRST — this was broken
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: false,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) => _AccountSheet(
         user: widget.user,
-        onSettings: () {
-          Navigator.pop(context); // close sheet first
-          _goToSettings();
-        },
+        onSettings: _goToAccountSettings,
         onLogout: _handleLogout,
       ),
     );
   }
 
-  void _goToSettings() {
+  void _goToAccountSettings() {
+    Navigator.pop(context); // Close bottom sheet first
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => AccountSettingsScreen(
           user: widget.user,
-          onUserUpdated: (updatedUser) {
-            // Bubble updated user back up if needed
-            // For now just update local state via setState
+          onUserUpdated: (_) => setState(() {}),
+          onCharts: _handleCharts,
+          onAI: _handleAI,
+          onAccount: _handleAccount,
+          onAddBook: _goToAddBook,
+        ),
+      ),
+    );
+  }
+
+  void _goToAddBook() {
+    Navigator.pop(context); // Close bottom sheet first
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddBookScreen(
+          currentUser: widget.user,
+          onCancel: () => Navigator.pop(context),
+          onBookAdded: () {
+            Navigator.pop(context);
             setState(() {});
           },
           onCharts: _handleCharts,
           onAI: _handleAI,
           onAccount: _handleAccount,
-          onAddBook: () {
-            // TODO: Navigate to Add Book screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Add Book screen coming soon')),
-            );
+        ),
+      ),
+    );
+  }
+
+  void _handleSearch(String query) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SearchScreen(
+          currentUser: widget.user,
+          initialQuery: query,
+          onBookTap: (book) {
+            Navigator.pop(context);
+            _handleBookTapById(book.id);
           },
+          onCharts: _handleCharts,
+          onAI: _handleAI,
+          onAccount: _handleAccount,
+        ),
+      ),
+    );
+  }
+
+  void _handleBookTapById(String bookId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BookDetailScreen(
+          bookId: bookId,
+          currentUser: widget.user,
+          onBack: () => Navigator.pop(context),
+          onCharts: _handleCharts,
+          onAI: _handleAI,
+          onAccount: _handleAccount,
         ),
       ),
     );
@@ -137,40 +210,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppNavbar(
             searchController: _searchController,
             currentUser: widget.user,
-            onCharts: widget.onCharts,
-            onAI: widget.onAI,
+            onCharts: _handleCharts,
+            onAI: _handleAI,
             onAccount: _handleAccount,
-            onSearch: widget.onSearch, // ADD THIS
+            onSearch: _handleSearch,
+            onBrandTap: widget.onBrandTap, // ADD THIS
           ),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  BookRowSection(
+                  _BookRowSection(
                     title: 'Recently Added',
                     books: MockData.recentlyAdded,
                     onBookTap: _handleBookTap,
                   ),
                   const _Divider(),
-                  BookRowSection(
+                  _BookRowSection(
                     title: 'Recommended for You',
                     books: MockData.recommended,
                     onBookTap: _handleBookTap,
                   ),
                   const _Divider(),
-                  BookRowSection(
+                  _BookRowSection(
                     title: 'Popular This Week',
                     books: MockData.popularThisWeek,
                     onBookTap: _handleBookTap,
                   ),
                   const _Divider(),
-                  BookRowSection(
+                  _BookRowSection(
                     title: 'New Releases',
                     books: MockData.newReleases,
                     onBookTap: _handleBookTap,
                   ),
                   const AppFooter(),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookRowSection extends StatelessWidget {
+  final String title;
+  final List<Book> books;
+  final void Function(Book)? onBookTap;
+
+  const _BookRowSection({
+    required this.title,
+    required this.books,
+    this.onBookTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTheme.sectionTitle),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 220,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: books.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) => BookCard(
+                book: books[index],
+                onTap: onBookTap != null
+                    ? () => onBookTap!(books[index])
+                    : null,
               ),
             ),
           ),
@@ -202,7 +316,11 @@ class _AccountSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppTheme.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,

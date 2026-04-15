@@ -8,8 +8,14 @@ import '../../widgets/auth_text_field.dart';
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onSignUpTap;
   final VoidCallback? onLoginSuccess;
+  final VoidCallback? onBrandTap; // ADD THIS
 
-  const LoginScreen({super.key, this.onSignUpTap, this.onLoginSuccess});
+  const LoginScreen({
+    super.key,
+    this.onSignUpTap,
+    this.onLoginSuccess,
+    this.onBrandTap, // ADD THIS
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -67,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
             searchController: _searchController,
             onLogin: () {},
             onSignUp: widget.onSignUpTap,
+            onBrandTap: widget.onBrandTap, // ADD THIS
           ),
           Expanded(
             child: Center(
