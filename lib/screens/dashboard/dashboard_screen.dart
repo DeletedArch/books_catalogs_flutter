@@ -11,10 +11,24 @@ import '../book/book_detail_screen.dart';
 import '../account/account_settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  final AppUser user;
+    final AppUser user;
   final VoidCallback? onLogout;
+  final void Function(Book book)? onBookTap; // already exists
+  final VoidCallback? onCharts; // ADD
+  final VoidCallback? onAI; // ADD
+  final VoidCallback? onAccount; // ADD
+  final void Function(String query)? onSearch; // ADD
 
-  const DashboardScreen({super.key, required this.user, this.onLogout});
+  const DashboardScreen({
+    super.key,
+    required this.user,
+    this.onLogout,
+    this.onBookTap,
+    this.onCharts,
+    this.onAI,
+    this.onAccount,
+    this.onSearch,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -123,9 +137,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppNavbar(
             searchController: _searchController,
             currentUser: widget.user,
-            onCharts: _handleCharts,
-            onAI: _handleAI,
+            onCharts: widget.onCharts,
+            onAI: widget.onAI,
             onAccount: _handleAccount,
+            onSearch: widget.onSearch, // ADD THIS
           ),
           Expanded(
             child: SingleChildScrollView(

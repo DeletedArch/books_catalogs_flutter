@@ -15,6 +15,9 @@ class AppNavbar extends StatelessWidget {
   final VoidCallback? onAI;
   final VoidCallback? onAccount;
 
+  // Search submission — fires when user hits enter or search button
+  final void Function(String query)? onSearch;
+
   const AppNavbar({
     super.key,
     required this.searchController,
@@ -24,6 +27,7 @@ class AppNavbar extends StatelessWidget {
     this.onCharts,
     this.onAI,
     this.onAccount,
+    this.onSearch, // ADD
   });
 
   bool get _isLoggedIn => currentUser != null;
@@ -37,7 +41,12 @@ class AppNavbar extends StatelessWidget {
         children: [
           const Text('Catalogs', style: AppTheme.navBrand),
           const SizedBox(width: 12),
-          Expanded(child: _SearchBar(controller: searchController)),
+          Expanded(
+            child: _SearchBar(
+              controller: searchController,
+              onSearch: onSearch, // pass down
+            ),
+          ),
           const SizedBox(width: 8),
           if (_isLoggedIn) ...[
             _NavButton(label: 'Charts', icon: Icons.bar_chart, onTap: onCharts),
@@ -62,7 +71,9 @@ class AppNavbar extends StatelessWidget {
 
 class _SearchBar extends StatelessWidget {
   final TextEditingController controller;
-  const _SearchBar({required this.controller});
+  final void Function(String query)? onSearch;
+
+  const _SearchBar({required this.controller, this.onSearch});
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +86,22 @@ class _SearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         style: const TextStyle(color: AppTheme.white, fontSize: 13),
-        decoration: const InputDecoration(
+        textInputAction: TextInputAction.search,
+        onSubmitted: onSearch, // fires on keyboard search key
+        decoration: InputDecoration(
           hintText: 'Search for books...',
-          hintStyle: TextStyle(color: Color(0xFF666666), fontSize: 13),
-          prefixIcon: Icon(Icons.search, color: Color(0xFF666666), size: 18),
+          hintStyle: const TextStyle(color: Color(0xFF666666), fontSize: 13),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: Color(0xFF666666),
+            size: 18,
+          ),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.search, color: Color(0xFF888888), size: 16),
+            onPressed: () => onSearch?.call(controller.text),
+          ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
         ),
       ),
     );
